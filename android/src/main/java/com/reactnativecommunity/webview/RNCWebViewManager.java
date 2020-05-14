@@ -107,6 +107,7 @@ import javax.annotation.Nullable;
 public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
   public static String activeUrl = null;
+  public static String refererUrl = null;
   public static final int COMMAND_GO_BACK = 1;
   public static final int COMMAND_GO_FORWARD = 2;
   public static final int COMMAND_RELOAD = 3;
@@ -609,7 +610,13 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
         if (args == null) {
           throw new RuntimeException("Arguments for loading an url are null!");
         }
-        root.loadUrl(args.getString(0));
+
+        HashMap<String, String> headerMap = new HashMap<>();
+        if (refererUrl != null) {
+          headerMap.put("Referer", refererUrl);
+        }
+
+        root.loadUrl(args.getString(0), headerMap);
         break;
       case COMMAND_FOCUS:
         root.requestFocus();
@@ -742,6 +749,7 @@ public class RNCWebViewManager extends SimpleViewManager<WebView> {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
+      refererUrl = activeUrl;
       activeUrl = url;
       dispatchEvent(
         view,
